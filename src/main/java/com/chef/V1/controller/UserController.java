@@ -1,6 +1,7 @@
 package com.chef.V1.controller;
 
 import com.chef.V1.entity.*;
+import com.chef.V1.repository.OrderRepositoryImpl;
 import com.chef.V1.service.OrderService;
 import com.chef.V1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("user")
@@ -28,29 +30,27 @@ public class UserController {
         String username = auth.getName();
         User user = userService.getByUsername(username);
         try{
-            Order order = new Order();
-            order.setUserId(user.getId().toString());
-            order.setDate(LocalDateTime.now());
-            order.setStatus("PENDING");
-            order.setTotalPrice(orderDTO.getTotalPrice());
-            order.setPeople(orderDTO.getPeople());
-            order.setItems(orderDTO.getItems());
-            orderService.saveOrder(order);
+            orderService.saveOrder(orderDTO, user.getId().toString());
             return new ResponseEntity<>(HttpStatus.OK);
         } catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
-//    @GetMapping("orders")
-//    public ResponseEntity<?> getOrders() {
-//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//        String username = authentication.getName();
-//        try{
-//            List<Order> orders = userService.getOrders(username);
-//            return new ResponseEntity<>(orders, HttpStatus.OK);
-//        } catch (Exception e) {
-//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
+    @GetMapping("orders")
+    public ResponseEntity<?> getAllOrders() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        User user = userService.getByUsername(username);
+        String userId = user.getId().toString();
+        try{
+            List<Order> orders = orderService.getAllOrders(userId);
+            if(!orders.isEmpty()){
+                return new ResponseEntity<>(orders, HttpStatus.OK);
+            }
+            else return new ResponseEntity<>("No orders present", HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 }
