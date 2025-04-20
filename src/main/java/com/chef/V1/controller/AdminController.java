@@ -1,7 +1,7 @@
 package com.chef.V1.controller;
 
 import com.chef.V1.entity.Item;
-import com.chef.V1.entity.User;
+import com.chef.V1.entity.UserDTO;
 import com.chef.V1.service.ItemService;
 import com.chef.V1.service.UserService;
 import org.bson.types.ObjectId;
@@ -24,7 +24,7 @@ public class AdminController {
     private UserService userService;
 
     @PostMapping("add_admin")
-    public ResponseEntity<?> addAdmin(@RequestBody User user) {
+    public ResponseEntity<?> addAdmin(@RequestBody UserDTO user) {
         try{
             userService.addNewAdmin(user);
             return new ResponseEntity<>(HttpStatus.OK);
@@ -59,21 +59,21 @@ public class AdminController {
 
     @PutMapping("{id}")
     public ResponseEntity<?> updateItem(@PathVariable ObjectId id, @RequestBody Map<String, Object> item){
-        Optional<Item> old = itemService.getItemById(id);
-        if(old.isPresent()){
-            Item oldItem = old.get();
-            for(String key : item.keySet()){
-                switch (key){
-                    case "name" -> oldItem.setName(item.get(key).toString());
-                    case "description" -> oldItem.setDescription(item.get(key).toString());
-                    case "price" -> oldItem.setPrice((Integer) item.get(key));
-                    case "available" -> oldItem.setAvailable((Boolean) item.get(key));
-                    case "imageUrl" -> oldItem.setImageUrl(item.get(key).toString());
-                }
-            }
-            itemService.addItem(oldItem);
+        try{
+            itemService.updateItem(id, item);
             return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @DeleteMapping("delete_user/{username}")
+    public ResponseEntity<?> deleteUser(@PathVariable String username){
+        try{
+            userService.deleteByUsername(username);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

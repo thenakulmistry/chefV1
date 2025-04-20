@@ -27,15 +27,28 @@ public class UserService {
         userRepo.save(user);
     }
 
-    public void addNewAdmin(User user){
+    public void addNewAdmin(UserDTO userDTO){
+        User user = new User();
+        user.setName(userDTO.getName());
+        user.setUsername(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
+        user.setNumber(userDTO.getNumber());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setRole("ADMIN");
         userRepo.save(user);
     }
 
     public User getByUsername(String username){return userRepo.findByUsername(username);}
 
-//    public List<Order> getOrders(String username){
-//        User user = userRepo.findByUsername(username);
-//        return user.getOrders();
-//    }
+    public void deleteByUsername(String username){userRepo.deleteByUsername(username);}
+
+    public void updateUser(UserDTO userDTO, String username){
+        User user = userRepo.findByUsername(username);
+        if(userDTO.getName() != null) user.setName(userDTO.getName());
+        if(userDTO.getNumber() != null) user.setNumber(userDTO.getNumber());
+        if(userDTO.getPassword() != null) user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        if(userDTO.getEmail() != null) user.setEmail(userDTO.getEmail());
+        if(userDTO.getUsername() != null) user.setUsername(userDTO.getUsername());
+        userRepo.save(user);
+    }
 }

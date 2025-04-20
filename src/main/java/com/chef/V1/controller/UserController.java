@@ -1,7 +1,6 @@
 package com.chef.V1.controller;
 
 import com.chef.V1.entity.*;
-import com.chef.V1.repository.OrderRepositoryImpl;
 import com.chef.V1.service.OrderService;
 import com.chef.V1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("user")
@@ -50,6 +48,18 @@ public class UserController {
             }
             else return new ResponseEntity<>("No orders present", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("update")
+    public ResponseEntity<?> updateUser(@RequestBody UserDTO userDTO) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+        try{
+            userService.updateUser(userDTO, username);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch(Exception e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
