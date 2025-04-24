@@ -22,7 +22,7 @@ public class ItemService {
 
     public Optional<Item> getItemById(ObjectId itemId) {return itemRepo.findById(itemId);}
 
-    public List<Item> getAllItems() {return itemRepo.findAll();}
+    public List<Item> findAll() {return itemRepo.findAll();}
 
     public void updateItem(ObjectId itemId, Map<String, Object> item){
         Optional<Item> old = itemRepo.findById(itemId);

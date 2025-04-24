@@ -12,6 +12,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/public")
 public class PublicController {
@@ -41,13 +44,21 @@ public class PublicController {
     }
 
     @PostMapping("login")
-    public ResponseEntity<String> login(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
         try{
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));
             userDetailsService.loadUserByUsername(userDTO.getUsername());
             String jwt = jwtUtil.generateToken(userDTO.getUsername());
-            return new ResponseEntity<>(jwt, HttpStatus.OK);
+            User user = userService.getByUsername(userDTO.getUsername());
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", jwt);
+            response.put("user", Map.of(
+                    "username", user.getUsername(),
+                    "name", user.getName(),
+                    "role", user.getRole()
+            ));
+            return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

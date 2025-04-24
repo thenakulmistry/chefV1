@@ -8,6 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Component
 public class UserService {
     @Autowired
@@ -15,6 +17,8 @@ public class UserService {
 
     @Autowired
     private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    public List<User> findAll() {return userRepo.findAll();}
 
     public void addNewUser(UserDTO userDTO){
         User user = new User();
