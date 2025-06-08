@@ -1,10 +1,8 @@
 package com.chef.V1.entity;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -17,9 +15,9 @@ public class Order {
     @Id
     private ObjectId id;
     private String userId;
-    private LocalDateTime date;
+    private LocalDateTime createdAt;
     private String status;
     private List<OrderItem> items = new ArrayList<>();
+    private Double totalPrice;
     private Integer people;
-    private Integer totalPrice;
 }

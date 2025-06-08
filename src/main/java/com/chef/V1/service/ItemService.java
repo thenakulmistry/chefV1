@@ -1,6 +1,7 @@
 package com.chef.V1.service;
 
 import com.chef.V1.entity.Item;
+import com.chef.V1.entity.ItemDTO;
 import com.chef.V1.repository.ItemRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,20 +25,13 @@ public class ItemService {
 
     public List<Item> findAll() {return itemRepo.findAll();}
 
-    public void updateItem(ObjectId itemId, Map<String, Object> item){
-        Optional<Item> old = itemRepo.findById(itemId);
-        if(old.isPresent()) {
-            Item oldItem = old.get();
-            for (String key : item.keySet()) {
-                switch (key) {
-                    case "name" -> oldItem.setName(item.get(key).toString());
-                    case "description" -> oldItem.setDescription(item.get(key).toString());
-                    case "price" -> oldItem.setPrice((Integer) item.get(key));
-                    case "available" -> oldItem.setAvailable((Boolean) item.get(key));
-                    case "imageUrl" -> oldItem.setImageUrl(item.get(key).toString());
-                }
-            }
-            itemRepo.save(oldItem);
-        }
+    public void updateItem(ObjectId itemId, ItemDTO item){
+        Item old = itemRepo.findItemById(itemId);
+        old.setName(item.getName());
+        old.setDescription(item.getDescription());
+        old.setPrice(item.getPrice());
+        old.setImageUrl(item.getImageUrl());
+        old.setAvailable(item.getAvailable());
+        itemRepo.save(old);
     }
 }

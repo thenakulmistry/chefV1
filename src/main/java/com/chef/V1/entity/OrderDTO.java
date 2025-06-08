@@ -8,5 +8,6 @@ import java.util.List;
 public class OrderDTO {
     private List<OrderItem> items;
     private Integer people;
-    private Integer totalPrice;
+    private Double totalPrice;
+    private String status;
 }

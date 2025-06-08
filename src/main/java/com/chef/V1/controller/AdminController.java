@@ -1,9 +1,10 @@
 package com.chef.V1.controller;
 
 import com.chef.V1.entity.Item;
-import com.chef.V1.entity.Order;
+import com.chef.V1.entity.ItemDTO;
 import com.chef.V1.entity.OrderDTO;
 import com.chef.V1.entity.UserDTO;
+import com.chef.V1.entity.OrderViewDTO; // Import OrderViewDTO
 import com.chef.V1.service.ItemService;
 import com.chef.V1.service.OrderService;
 import com.chef.V1.service.UserService;
@@ -43,8 +44,9 @@ public class AdminController {
     }
 
     @GetMapping("orders")
-    public ResponseEntity<?> getOrders() {
-        return new ResponseEntity<>(orderService.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<OrderViewDTO>> getOrders() { // Return List<OrderViewDTO>
+        // Assuming you renamed findAll to findAllWithUserDetails or use the modified one
+        return new ResponseEntity<>(orderService.findAllWithUserDetails(), HttpStatus.OK);
     }
     @GetMapping("items")
     public ResponseEntity<List<Item>> getItems() {
@@ -72,9 +74,9 @@ public class AdminController {
     }
 
     @PutMapping("item/{id}")
-    public ResponseEntity<?> updateItem(@PathVariable ObjectId id, @RequestBody Map<String, Object> item){
+    public ResponseEntity<?> updateItem(@PathVariable ObjectId id, @RequestBody ItemDTO itemDTO){
         try{
-            itemService.updateItem(id, item);
+            itemService.updateItem(id, itemDTO);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -102,11 +104,21 @@ public class AdminController {
     }
 
     @PutMapping("order/{orderId}")
-    public ResponseEntity<?> updateOrder(@PathVariable ObjectId orderId, @RequestBody String status){
+    public ResponseEntity<?> updateOrderStatus(@PathVariable ObjectId orderId, @RequestBody OrderDTO orderDTO){
         try{
-            orderService.updateOrderStatus(orderId, status);
+            orderService.updateOrder(orderId, orderDTO);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("order/{orderId}")
+    public ResponseEntity<?> deleteOrder(@PathVariable ObjectId orderId){
+        try{
+            orderService.deleteOrder(orderId);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

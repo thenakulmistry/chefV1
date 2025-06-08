@@ -14,7 +14,7 @@ public class Item {
     private ObjectId id;
     private String name;
     private String description;
-    private Integer price;
+    private Double price;
     private String imageUrl;
     private Boolean available;
 }

@@ -3,6 +3,7 @@ package com.chef.V1.service;
 import com.chef.V1.entity.User;
 import com.chef.V1.entity.UserDTO;
 import com.chef.V1.repository.UserRepository;
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,5 +55,9 @@ public class UserService {
         if(userDTO.getEmail() != null) user.setEmail(userDTO.getEmail());
         if(userDTO.getUsername() != null) user.setUsername(userDTO.getUsername());
         userRepo.save(user);
+    }
+
+    public User findById(ObjectId id) {
+        return userRepo.findById(id).orElse(null);
     }
 }
