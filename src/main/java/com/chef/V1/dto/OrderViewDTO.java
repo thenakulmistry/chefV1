@@ -1,5 +1,7 @@
-package com.chef.V1.entity;
+package com.chef.V1.dto;
 
+import com.chef.V1.entity.Order;
+import com.chef.V1.entity.OrderItem;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.ObjectId;

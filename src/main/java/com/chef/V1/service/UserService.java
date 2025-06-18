@@ -1,7 +1,7 @@
 package com.chef.V1.service;
 
 import com.chef.V1.entity.User;
-import com.chef.V1.entity.UserDTO;
+import com.chef.V1.dto.UserDTO;
 import com.chef.V1.repository.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;

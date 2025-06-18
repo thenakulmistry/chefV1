@@ -1,8 +1,8 @@
 package com.chef.V1.service;
 
 import com.chef.V1.entity.Order;
-import com.chef.V1.entity.OrderDTO;
-import com.chef.V1.entity.OrderViewDTO; // Import the new DTO
+import com.chef.V1.dto.OrderDTO;
+import com.chef.V1.dto.OrderViewDTO; // Import the new DTO
 import com.chef.V1.entity.User;         // Import User entity
 import com.chef.V1.repository.OrderRepository;
 import com.chef.V1.repository.OrderRepositoryImpl;

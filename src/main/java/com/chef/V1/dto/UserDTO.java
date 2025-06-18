@@ -1,4 +1,4 @@
-package com.chef.V1.entity;
+package com.chef.V1.dto;
 
 import lombok.Data;
 

@@ -1,8 +1,7 @@
 package com.chef.V1.controller;
 
 import com.chef.V1.entity.User;
-import com.chef.V1.entity.UserDTO;
-import com.chef.V1.service.UserDetailsServiceImpl;
+import com.chef.V1.dto.UserDTO;
 import com.chef.V1.service.UserService;
 import com.chef.V1.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;

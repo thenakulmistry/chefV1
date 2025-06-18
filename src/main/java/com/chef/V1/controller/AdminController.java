@@ -1,10 +1,10 @@
 package com.chef.V1.controller;
 
 import com.chef.V1.entity.Item;
-import com.chef.V1.entity.ItemDTO;
-import com.chef.V1.entity.OrderDTO;
-import com.chef.V1.entity.UserDTO;
-import com.chef.V1.entity.OrderViewDTO; // Import OrderViewDTO
+import com.chef.V1.dto.ItemDTO;
+import com.chef.V1.dto.OrderDTO;
+import com.chef.V1.dto.UserDTO;
+import com.chef.V1.dto.OrderViewDTO; // Import OrderViewDTO
 import com.chef.V1.service.ItemService;
 import com.chef.V1.service.OrderService;
 import com.chef.V1.service.UserService;
@@ -15,7 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
