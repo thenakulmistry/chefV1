@@ -4,6 +4,7 @@ package com.chef.V1.config;
 import com.chef.V1.filter.JwtFilter;
 import com.chef.V1.service.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,6 +28,9 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SpringSecurity {
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     @Autowired
     UserDetailsServiceImpl userDetailsService;
     @Autowired
@@ -49,7 +53,7 @@ public class SpringSecurity {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList(frontendUrl));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
