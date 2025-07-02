@@ -14,14 +14,14 @@ import java.util.List;
 public class OrderViewDTO {
     private ObjectId id;
     private String userId;
-    private String username; // New field
+    private String username;
     private LocalDateTime createdAt;
     private String status;
     private List<OrderItem> items;
     private Double totalPrice;
     private Integer people;
+    private LocalDateTime requiredByDateTime;
 
-    // Constructor to map from Order entity and add username
     public OrderViewDTO(Order order, String username) {
         this.id = order.getId();
         this.userId = order.getUserId();
@@ -31,17 +31,6 @@ public class OrderViewDTO {
         this.items = order.getItems();
         this.totalPrice = order.getTotalPrice();
         this.people = order.getPeople();
-    }
-
-    // Optional: A constructor if username is not found or for other cases
-    public OrderViewDTO(Order order) {
-        this.id = order.getId();
-        this.userId = order.getUserId();
-        this.username = "N/A"; // Default if user not found
-        this.createdAt = order.getCreatedAt();
-        this.status = order.getStatus();
-        this.items = order.getItems();
-        this.totalPrice = order.getTotalPrice();
-        this.people = order.getPeople();
+        this.requiredByDateTime = order.getRequiredByDateTime();
     }
 }

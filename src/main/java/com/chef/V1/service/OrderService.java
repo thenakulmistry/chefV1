@@ -31,6 +31,7 @@ public class OrderService {
         order.setTotalPrice(orderDTO.getTotalPrice());
         order.setPeople(orderDTO.getPeople());
         order.setItems(orderDTO.getItems());
+        order.setRequiredByDateTime(orderDTO.getRequiredByDateTime());
         orderRepository.save(order);
     }
 
@@ -60,11 +61,11 @@ public class OrderService {
     }
     public void updateOrder(ObjectId orderId, OrderDTO orderDTO) {
         Order order = orderRepository.findOrderById(orderId);
-        order.setCreatedAt(LocalDateTime.now());
         order.setItems(orderDTO.getItems());
         order.setPeople(orderDTO.getPeople());
         order.setTotalPrice(orderDTO.getTotalPrice());
         order.setStatus(orderDTO.getStatus());
+        order.setRequiredByDateTime(orderDTO.getRequiredByDateTime());
         orderRepository.save(order);
     }
 }

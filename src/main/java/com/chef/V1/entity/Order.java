@@ -20,4 +20,5 @@ public class Order {
     private List<OrderItem> items = new ArrayList<>();
     private Double totalPrice;
     private Integer people;
+    private LocalDateTime requiredByDateTime;
 }
