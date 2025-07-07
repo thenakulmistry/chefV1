@@ -32,6 +32,7 @@ public class OrderService {
         order.setPeople(orderDTO.getPeople());
         order.setItems(orderDTO.getItems());
         order.setRequiredByDateTime(orderDTO.getRequiredByDateTime());
+        order.setNotes(orderDTO.getNotes());
         orderRepository.save(order);
     }
 
@@ -66,6 +67,7 @@ public class OrderService {
         order.setTotalPrice(orderDTO.getTotalPrice());
         order.setStatus(orderDTO.getStatus());
         order.setRequiredByDateTime(orderDTO.getRequiredByDateTime());
+        order.setNotes(orderDTO.getNotes());
         orderRepository.save(order);
     }
 }

@@ -17,4 +17,5 @@ public class Item {
     private Double price;
     private String imageUrl;
     private Boolean available;
+    private ItemType itemType;
 }

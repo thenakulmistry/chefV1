@@ -31,6 +31,7 @@ public class ItemService {
         old.setPrice(item.getPrice());
         old.setImageUrl(item.getImageUrl());
         old.setAvailable(item.getAvailable());
+        old.setItemType(item.getItemType());
         itemRepo.save(old);
     }
 }

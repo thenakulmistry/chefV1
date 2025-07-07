@@ -21,4 +21,5 @@ public class Order {
     private Double totalPrice;
     private Integer people;
     private LocalDateTime requiredByDateTime;
+    private String notes;
 }

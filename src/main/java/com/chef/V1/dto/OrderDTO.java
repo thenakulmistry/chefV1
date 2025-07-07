@@ -13,4 +13,5 @@ public class OrderDTO {
     private Double totalPrice;
     private String status;
     private LocalDateTime requiredByDateTime;
+    private String notes;
 }

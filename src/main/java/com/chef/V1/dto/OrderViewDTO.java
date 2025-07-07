@@ -21,6 +21,7 @@ public class OrderViewDTO {
     private Double totalPrice;
     private Integer people;
     private LocalDateTime requiredByDateTime;
+    private String notes;
 
     public OrderViewDTO(Order order, String username) {
         this.id = order.getId();
@@ -32,5 +33,6 @@ public class OrderViewDTO {
         this.totalPrice = order.getTotalPrice();
         this.people = order.getPeople();
         this.requiredByDateTime = order.getRequiredByDateTime();
+        this.notes = order.getNotes();
     }
 }
