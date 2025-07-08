@@ -60,6 +60,7 @@ public class GoogleAuthController {
             params.add("client_secret", clientSecret);
             params.add("redirect_uri", frontendRedirectUri);
             params.add("grant_type", "authorization_code");
+            params.add("access_type", "offline");
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -109,10 +110,12 @@ public class GoogleAuthController {
                     logger.info("User with email {} found. ID: {}", email, user.getId());
                 }
 
-                String jwtToken = jwtUtil.generateToken(email);
+                String appAccessToken = jwtUtil.generateToken(email);
+                String appRefreshToken = jwtUtil.generateRefreshToken(email);
 
                 Map<String, Object> responseBody = new HashMap<>();
-                responseBody.put("accessToken", jwtToken);
+                responseBody.put("accessToken", appAccessToken);
+                responseBody.put("refreshToken", appRefreshToken);
 
                 Map<String, Object> userMap = new HashMap<>();
                 userMap.put("id", user.getId());

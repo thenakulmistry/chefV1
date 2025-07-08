@@ -65,10 +65,14 @@ public class PublicController {
         try{
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));
-            String jwt = jwtUtil.generateToken(userDTO.getUsername());
+            String accessToken = jwtUtil.generateToken(userDTO.getUsername());
+            String refreshToken = jwtUtil.generateRefreshToken(userDTO.getUsername());
             User user = userService.getByUsername(userDTO.getUsername());
+
             Map<String, Object> response = new HashMap<>();
-            response.put("token", jwt);
+
+            response.put("accessToken", accessToken);
+            response.put("refreshToken", refreshToken);
             Map<String, Object> userDetails = new HashMap<>();
             userDetails.put("username", user.getUsername());
             userDetails.put("name", user.getName());
@@ -76,12 +80,31 @@ public class PublicController {
             userDetails.put("email", user.getEmail());
             userDetails.put("number", user.getNumber());
             response.put("user", userDetails);
+
             return new ResponseEntity<>(response, HttpStatus.OK);
         } catch (BadCredentialsException e) {
             return new ResponseEntity<>("Invalid username or password", HttpStatus.UNAUTHORIZED);
         }
          catch (Exception e) {
             return new ResponseEntity<>("Login failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PostMapping("refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refresh_token");
+        try{
+            if(refreshToken != null && jwtUtil.validateToken(refreshToken)) {
+                String username = jwtUtil.extractUsername(refreshToken);
+                String newAccessToken = jwtUtil.generateToken(username);
+
+                Map<String, String> response = new HashMap<>();
+                response.put("accessToken", newAccessToken);
+                return ResponseEntity.ok(response);
+            }
+            else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid refresh token"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", e.getMessage()));
         }
     }
 

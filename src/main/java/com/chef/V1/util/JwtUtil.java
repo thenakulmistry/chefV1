@@ -20,6 +20,11 @@ public class JwtUtil {
         return createToken(claims, username);
     }
 
+    public String generateRefreshToken(String username) {
+        Map<String, Object> claims = new HashMap<>();
+        return createRefreshToken(claims, username);
+    }
+
     public String extractUsername(String token) {
         Claims claims = extractAllClaims(token);
         return claims.getSubject();
@@ -41,6 +46,15 @@ public class JwtUtil {
                 .and()
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public String createRefreshToken(Map<String, Object> claims, String subject) {
+        return Jwts.builder()
+                .subject(subject)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 7))
                 .signWith(getSigningKey())
                 .compact();
     }
