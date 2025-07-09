@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: V1
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI}
+      database: ${SPRING_DATA_MONGODB_DATABASE}
+      auto-index-creation: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_OAUTH2_CLIENT_ID}
+            client-secret: ${GOOGLE_OAUTH2_CLIENT_SECRET}
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  frontend:
+    url: ${APP_FRONTEND_URL}
+    google-redirect-uri: ${APP_FRONTEND_GOOGLE_REDIRECT_URI}
+
+jwt:
+  secret_key: ${JWT_SECRET}
