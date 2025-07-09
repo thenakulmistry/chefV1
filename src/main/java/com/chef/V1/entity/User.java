@@ -23,4 +23,5 @@ public class User {
     private Integer number;
     private String email;
     private String role;
+    private Boolean enabled;
 }

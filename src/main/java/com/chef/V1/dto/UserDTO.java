@@ -9,4 +9,5 @@ public class UserDTO {
     private String password;
     private String email;
     private Integer number;
+    private Boolean enabled;
 }

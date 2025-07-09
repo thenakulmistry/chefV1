@@ -22,7 +22,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                     .User.builder()
                     .username(user.getUsername())
                     .password(user.getPassword())
-                    .roles(user.getRole()).build();
+                    .roles(user.getRole())
+                    .disabled(user.getEnabled() == null || !user.getEnabled())
+                    .build();
         }
         throw new UsernameNotFoundException("User not found");
     }

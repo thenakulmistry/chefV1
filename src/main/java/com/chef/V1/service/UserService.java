@@ -17,7 +17,7 @@ public class UserService {
     private UserRepository userRepo;
 
     @Autowired
-    private static final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public List<User> findAll() {return userRepo.findAll();}
 
@@ -29,6 +29,7 @@ public class UserService {
         user.setNumber(userDTO.getNumber());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setRole("USER");
+        user.setEnabled(false);
         userRepo.save(user);
     }
 
@@ -40,6 +41,7 @@ public class UserService {
         user.setNumber(userDTO.getNumber());
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setRole("ADMIN");
+        user.setEnabled(true);
         userRepo.save(user);
     }
 

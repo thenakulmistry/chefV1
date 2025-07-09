@@ -105,6 +105,7 @@ public class GoogleAuthController {
                     user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
                     user.setRole("USER");
                     user.setName(name);
+                    user.setEnabled(true); // Enable user automatically for OAuth
                     userRepository.save(user); // Ensure 'user' is the saved entity
                 } else {
                     logger.info("User with email {} found. ID: {}", email, user.getId());
