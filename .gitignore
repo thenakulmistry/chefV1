@@ -34,4 +34,5 @@ build/
 .vscode/
 
 /src/test
-.env
+.env.prod
+.env.dev
