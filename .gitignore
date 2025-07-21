@@ -36,3 +36,5 @@ build/
 /src/test
 .env.prod
 .env.dev
+First.pem
+v1.tar

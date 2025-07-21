@@ -34,7 +34,7 @@ public class GoogleAuthController {
     @Value("${spring.security.oauth2.client.registration.google.client-secret}")
     private String clientSecret;
 
-    @Value("${app.frontend.google-redirect-uri}")
+    @Value("${app.frontend.google.redirect-uri}")
     private String frontendRedirectUri;
 
     @Autowired

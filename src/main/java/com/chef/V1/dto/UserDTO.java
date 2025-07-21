@@ -10,4 +10,5 @@ public class UserDTO {
     private String email;
     private Integer number;
     private Boolean enabled;
+    private String usernameOrEmail; // Add this field for login
 }

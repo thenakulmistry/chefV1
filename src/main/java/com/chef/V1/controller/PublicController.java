@@ -31,7 +31,7 @@ public class PublicController {
     @Value("${app.frontend.url}")
     private String frontendUrl;
 
-    @Value("${mail.username}")
+    @Value("${spring.mail.username}")
     private String mailUsername;
 
     @Autowired
@@ -59,7 +59,7 @@ public class PublicController {
         try{
             // Check if user already exists
             if (userRepository.findByUsername(userDTO.getUsername()) != null || userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
-                return new ResponseEntity<>("Username or Email already exists.", HttpStatus.CONFLICT);
+                return new ResponseEntity<>(Map.of("message", "Username or Email already exists."), HttpStatus.CONFLICT);
             }
             userService.addNewUser(userDTO);
             User user = userRepository.findByUsername(userDTO.getUsername());
@@ -79,20 +79,29 @@ public class PublicController {
 
             return new ResponseEntity<>(Map.of("message", "Registration successful. Please check your email to verify your account."), HttpStatus.CREATED);
         } catch (Exception e) {
-            return new ResponseEntity<>("Registration failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(Map.of("message", "Registration failed: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @PostMapping("login")
     public ResponseEntity<?> login(@RequestBody UserDTO userDTO) {
         try{
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword()));
+            String usernameOrEmail = userDTO.getUsernameOrEmail();
+            String password = userDTO.getPassword();
             
-            User user = userService.getByUsername(userDTO.getUsername());
+            // Find user by username or email
+            User user = null;
+            if (usernameOrEmail.contains("@")) user = userRepository.findByEmail(usernameOrEmail).orElse(null);
+            else user = userRepository.findByUsername(usernameOrEmail);
+            
+            if (user == null) return new ResponseEntity<>(Map.of("message", "Invalid username/email or password"), HttpStatus.UNAUTHORIZED);
+            
+            // Authenticate using the actual username (since Spring Security expects username)
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), password));
 
-            String accessToken = jwtUtil.generateToken(userDTO.getUsername());
-            String refreshToken = jwtUtil.generateRefreshToken(userDTO.getUsername());
+            String accessToken = jwtUtil.generateToken(user.getUsername());
+            String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
 
             Map<String, Object> response = new HashMap<>();
 
@@ -110,7 +119,7 @@ public class PublicController {
         } catch (DisabledException e) {
             return new ResponseEntity<>(Map.of("message", "Please verify your email before logging in."), HttpStatus.UNAUTHORIZED);
         } catch (BadCredentialsException e) {
-            return new ResponseEntity<>(Map.of("message", "Invalid username or password"), HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(Map.of("message", "Invalid username/email or password"), HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             return new ResponseEntity<>(Map.of("message", "Login failed: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }

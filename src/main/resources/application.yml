@@ -1,10 +1,11 @@
+# Default/Development configuration. These values will be overridden by environment variables in production.
 spring:
   application:
     name: V1
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI}
-      database: ${SPRING_DATA_MONGODB_DATABASE}
+      database: ${SPRING_DATA_MONGODB_URI}
       auto-index-creation: true
   security:
     oauth2:
@@ -28,7 +29,8 @@ spring:
 app:
   frontend:
     url: ${APP_FRONTEND_URL}
-    google-redirect-uri: ${APP_FRONTEND_GOOGLE_REDIRECT_URI}
+    google:
+      redirect-uri: ${APP_FRONTEND_GOOGLE_REDIRECT_URI}
 
 jwt:
-  secret_key: ${JWT_SECRET}
+  secret: ${JWT_SECRET}

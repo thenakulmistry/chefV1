@@ -32,9 +32,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     private final List<String> publicPaths = Arrays.asList(
-            "/public/login",
-            "/public/register",
-            "/public/health_check"
+            "/public/",
+            "/health-check"
     );
 
     @Override
