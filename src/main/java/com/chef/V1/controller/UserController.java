@@ -5,7 +5,10 @@ import com.chef.V1.dto.UserDTO;
 import com.chef.V1.entity.*;
 import com.chef.V1.service.ItemService;
 import com.chef.V1.service.OrderService;
+import com.chef.V1.service.JWTTokenService;
 import com.chef.V1.service.UserService;
+import com.chef.V1.util.JwtUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,6 +30,10 @@ public class UserController {
     private OrderService orderService;
     @Autowired
     private ItemService itemService;
+    @Autowired
+    private JwtUtil jwtUtil;
+    @Autowired
+    private JWTTokenService jwtTokenService;
 
     @GetMapping("profile")
     public ResponseEntity<?> profile(@AuthenticationPrincipal UserDetails userDetails){
@@ -114,6 +121,27 @@ public class UserController {
             return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
         } catch (Exception e) {
             return new ResponseEntity<>(Map.of("message", e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("logout")
+    public ResponseEntity<?> logout(HttpServletRequest request) {
+        try{
+            String authHeader = request.getHeader("Authorization");
+            if(authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                long remaingTime = jwtUtil.getRemainingTime(token);
+                if(remaingTime > 0) {
+                    jwtTokenService.blacklistToken(token, remaingTime);
+                    String username = jwtUtil.extractUsername(token);
+                    jwtTokenService.removeActiveToken("access:"+username);
+                    jwtTokenService.removeActiveToken("refresh:"+username);
+                }
+                return ResponseEntity.ok().body(Map.of("message", "Logged out successfully"));
+            }
+            return ResponseEntity.badRequest().body(Map.of("message", "No token provided"));
+        } catch (Exception e) {
+            return new ResponseEntity<>(Map.of("message", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

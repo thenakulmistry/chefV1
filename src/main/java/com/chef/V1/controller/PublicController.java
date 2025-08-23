@@ -1,10 +1,11 @@
 package com.chef.V1.controller;
 
-import com.chef.V1.entity.PasswordResetToken;
 import com.chef.V1.entity.User;
 import com.chef.V1.dto.UserDTO;
 import com.chef.V1.repository.PasswordResetTokenRepository;
 import com.chef.V1.repository.UserRepository;
+import com.chef.V1.service.JWTTokenService;
+import com.chef.V1.service.PasswordResetService;
 import com.chef.V1.service.UserService;
 import com.chef.V1.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,10 @@ public class PublicController {
     private JavaMailSender mailSender;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JWTTokenService jwtTokenService;
+    @Autowired
+    private PasswordResetService passwordResetService;
 
     @GetMapping("health_check")
     public String healthCheck(){
@@ -66,8 +71,9 @@ public class PublicController {
 
             // Send verification email
             String tokenString = UUID.randomUUID().toString();
-            PasswordResetToken verificationToken = new PasswordResetToken(tokenString, user);
-            tokenRepository.save(verificationToken);
+            passwordResetService.storeVerifyToken(tokenString, user.getEmail());
+//            PasswordResetToken verificationToken = new PasswordResetToken(tokenString, user);
+//            tokenRepository.save(verificationToken);
 
             String verificationLink = frontendUrl + "/verify-email?token=" + tokenString;
             SimpleMailMessage message = new SimpleMailMessage();
@@ -103,6 +109,12 @@ public class PublicController {
             String accessToken = jwtUtil.generateToken(user.getUsername());
             String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
 
+            long accessTokenExpiration = jwtUtil.getRemainingTime(accessToken);
+            long refreshTokenExpiration = jwtUtil.getRemainingTime(refreshToken);
+
+            jwtTokenService.storeActiveToken("access:"+user.getUsername(), accessToken, accessTokenExpiration);
+            jwtTokenService.storeActiveToken("refresh:"+user.getUsername(), refreshToken, refreshTokenExpiration);
+
             Map<String, Object> response = new HashMap<>();
 
             response.put("accessToken", accessToken);
@@ -131,10 +143,30 @@ public class PublicController {
         try{
             if(refreshToken != null && jwtUtil.validateToken(refreshToken)) {
                 String username = jwtUtil.extractUsername(refreshToken);
+
+                if(jwtTokenService.isTokenBlacklisted(refreshToken))
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Refresh token has been invalidated"));
+
+                String storedRefreshToken = jwtTokenService.getActiveToken("refresh:"+username);
+                if(!refreshToken.equals(storedRefreshToken))
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Refresh token has been invalidated"));
+
                 String newAccessToken = jwtUtil.generateToken(username);
+                String newRefreshToken = jwtUtil.generateRefreshToken(username);
+
+                long accessTokenExpiration = jwtUtil.getRemainingTime(newAccessToken);
+                long refreshTokenExpiration = jwtUtil.getRemainingTime(newRefreshToken);
+
+                jwtTokenService.storeActiveToken("access:"+username, newAccessToken, accessTokenExpiration);
+                jwtTokenService.storeActiveToken("refresh:"+username, newRefreshToken, refreshTokenExpiration);
+
+                long remainingTime = jwtUtil.getRemainingTime(refreshToken);
+                if(remainingTime > 0)
+                    jwtTokenService.blacklistToken(refreshToken, remainingTime);
 
                 Map<String, String> response = new HashMap<>();
                 response.put("accessToken", newAccessToken);
+                response.put("refreshToken", newRefreshToken);
                 return ResponseEntity.ok(response);
             }
             else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Invalid refresh token"));
@@ -145,12 +177,21 @@ public class PublicController {
 
     @PostMapping("forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
-        User user = userRepository.findByEmail(request.get("email")).orElse(null);
-        if(user == null) { return ResponseEntity.ok(Map.of("message", "If an account with that email exists, a mail has been sent to reset the password")); }
+        String email = request.get("email");
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if(passwordResetService.isRateLimited(email))
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(Map.of("message", "Please wait before requesting another password reset"));
+        if(user == null) {
+            passwordResetService.setRateLimit(email);
+            return ResponseEntity.ok(Map.of("message", "If an account with that email exists, a mail has been sent to reset the password"));
+        }
         try{
+            passwordResetService.setRateLimit(email);
             String tokenString = UUID.randomUUID().toString();
-            PasswordResetToken passwordResetToken = new PasswordResetToken(tokenString, user);
-            tokenRepository.save(passwordResetToken);
+            passwordResetService.storeResetToken(tokenString, user.getEmail());
+//            PasswordResetToken passwordResetToken = new PasswordResetToken(tokenString, user);
+//            tokenRepository.save(passwordResetToken);
             String resetLink = frontendUrl + "/reset-password?token=" + tokenString;
             SimpleMailMessage message = new SimpleMailMessage();
             message.setFrom(mailUsername);
@@ -173,35 +214,43 @@ public class PublicController {
             return ResponseEntity.badRequest().body(Map.of("message", "Token and new password are required."));
         }
 
-        PasswordResetToken passwordResetToken = tokenRepository.findByToken(token).orElse(null);
-        if(passwordResetToken == null || passwordResetToken.isExpired()) {
+        String email = passwordResetService.getEmailFromResetToken(token);
+//        PasswordResetToken passwordResetToken = tokenRepository.findByToken(token).orElse(null);
+        if(email == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Invalid or expired token"));
-        }
 
-        User user = passwordResetToken.getUser();
+        User user = userRepository.findByEmail(email).orElse(null);
+        if(user == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "User not found"));
+
         user.setPassword(passwordEncoder.encode(password));
         userRepository.save(user);
 
-        tokenRepository.delete(passwordResetToken);
+        passwordResetService.deleteResetToken(token);
+//        tokenRepository.delete(passwordResetToken);
         return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
     }
 
     @PostMapping("verify-email")
     public ResponseEntity<?> verifyEmail(@RequestParam("token") String token) {
-        PasswordResetToken verificationToken = tokenRepository.findByToken(token).orElse(null);
+        String email = passwordResetService.getEmailFromVerifyToken(token);
+//        PasswordResetToken verificationToken = tokenRepository.findByToken(token).orElse(null);
 
-        if (verificationToken == null || verificationToken.isExpired()) {
+        if (email == null)
             return ResponseEntity.badRequest().body(Map.of("message", "Invalid or expired verification token."));
-        }
 
-        User user = verificationToken.getUser();
+        User user = userRepository.findByEmail(email).orElse(null);
+        if(user == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "User not found"));
+
         if (user.getEnabled()) {
+            passwordResetService.deleteVerifyToken(token);
             return ResponseEntity.ok(Map.of("message", "Account already verified."));
         }
 
         user.setEnabled(true);
         userRepository.save(user);
-        tokenRepository.delete(verificationToken);
+//        tokenRepository.delete(verificationToken);
 
         return ResponseEntity.ok(Map.of("message", "Email verified successfully. You can now log in."));
     }

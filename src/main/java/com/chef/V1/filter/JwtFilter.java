@@ -1,5 +1,6 @@
 package com.chef.V1.filter;
 
+import com.chef.V1.service.JWTTokenService;
 import com.chef.V1.service.UserDetailsServiceImpl;
 import com.chef.V1.util.JwtUtil;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -27,9 +28,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
-
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private JWTTokenService tokenService;
 
     private final List<String> publicPaths = Arrays.asList(
             "/public/",
@@ -49,6 +51,16 @@ public class JwtFilter extends OncePerRequestFilter {
         String jwtToken = null;
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwtToken = authHeader.substring(7);
+
+            if(jwtToken != null){
+                if(tokenService.isTokenBlacklisted(jwtToken)) {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"error\": \"Token is invalid\"}");
+                    response.setContentType("application/json");
+                    return;
+                }
+            }
+
             try{
                 username = jwtUtil.extractUsername(jwtToken);
             }catch(ExpiredJwtException e){

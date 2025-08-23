@@ -68,5 +68,7 @@ public class JwtUtil {
 
     private Date extractExpiration(String token) {return extractAllClaims(token).getExpiration();}
 
+    public long getRemainingTime(String token) {return extractExpiration(token).getTime() - System.currentTimeMillis();}
+
     private SecretKey getSigningKey() {return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());}
 }

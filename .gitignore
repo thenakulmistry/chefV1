@@ -37,4 +37,21 @@ build/
 .env.prod
 .env.dev
 First.pem
-v1.tar
+*.tar
+*.tar.gz
+*.zip
+*.war
+*.jar
+*.ear
+*.rar
+*.7z
+
+# Docker images
+*.docker
+docker-compose.override.yml
+
+# Large files
+*.log
+*.sql
+*.dump
+*.tmp
