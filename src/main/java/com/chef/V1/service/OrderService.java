@@ -2,8 +2,10 @@ package com.chef.V1.service;
 
 import com.chef.V1.entity.Order;
 import com.chef.V1.dto.OrderDTO;
-import com.chef.V1.dto.OrderViewDTO; // Import the new DTO
-import com.chef.V1.entity.User;         // Import User entity
+import com.chef.V1.dto.OrderViewDTO;
+import com.chef.V1.entity.Item;
+import com.chef.V1.entity.OrderItem;
+import com.chef.V1.entity.User;
 import com.chef.V1.repository.OrderRepository;
 import com.chef.V1.repository.OrderRepositoryImpl;
 import org.bson.types.ObjectId;
@@ -12,7 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors; // Import Collectors
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class OrderService {
@@ -21,14 +24,30 @@ public class OrderService {
     @Autowired
     private OrderRepositoryImpl orderRepositoryImpl;
     @Autowired
-    private UserService userService; // Autowire UserService
+    private UserService userService;
+    @Autowired
+    private ItemService itemService;
 
     public void saveOrder(OrderDTO orderDTO, String userId) {
+        double serverCalculatedTotalPrice = 0.0;
+        for (OrderItem orderItem : orderDTO.getItems()) {
+            Optional<Item> dbItemOpt = itemService.getItemById(new ObjectId(orderItem.getItemId()));
+            if (dbItemOpt.isPresent()) {
+                Item dbItem = dbItemOpt.get();
+                serverCalculatedTotalPrice += dbItem.getPrice() * orderItem.getQuantity();
+                // Also ensure the name and price in the order item match the database
+                orderItem.setName(dbItem.getName());
+                orderItem.setPrice(dbItem.getPrice());
+            } else {
+                throw new RuntimeException("Attempted to order an invalid item: " + orderItem.getItemId());
+            }
+        }
+
         Order order = new Order();
         order.setUserId(userId);
         order.setCreatedAt(LocalDateTime.now());
         order.setStatus("PENDING");
-        order.setTotalPrice(orderDTO.getTotalPrice());
+        order.setTotalPrice(serverCalculatedTotalPrice);
         order.setPeople(orderDTO.getPeople());
         order.setItems(orderDTO.getItems());
         order.setRequiredByDateTime(orderDTO.getRequiredByDateTime());
