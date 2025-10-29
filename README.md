@@ -1,6 +1,6 @@
 # Gauri Cooks - Backend Service
 
-This repository contains the backend service for **Gauri Cooks**, a bespoke food ordering platform. This service is built with Java and Spring Boot, uses MongoDB as its database, Redis for caching and session management, and is deployed on AWS. It serves the frontend application available at [gauricooks.com](https://gauricooks.com).
+This repository contains the backend service for **Gauri Cooks**, a bespoke food ordering platform. This service is built with Java and Spring Boot, uses MongoDB as its database, Redis for caching and session management, Stripe for payments, and is deployed on AWS. It serves the frontend application available at [gauricooks.com](https://gauricooks.com).
 
 This is the backend repository. The frontend code is in a separate repository.
 
@@ -12,13 +12,15 @@ This is the backend repository. The frontend code is in a separate repository.
 *   **Menu Management:** Admins can perform CRUD operations on food items available for order.
 *   **Order Management:** Users can create, view, and update their orders. Admins can view and manage all orders.
 *   **Password Reset:** Secure "forgot password" flow via email with Redis-based token storage and rate limiting.
+*   **Payment Processing:** Secure payment intent creation for online orders using Stripe.
 *   **Session Security:** JWT token blacklisting and automatic cleanup using Redis.
 
 ## Technologies Used
 
 *   **Backend:** Java 21, Spring Boot
 *   **Database:** MongoDB
-*   **Cache & Session Store:** Redis
+*   **Caching:** Redis
+*   **Payments:** Stripe
 *   **Authentication:** Spring Security, JWT
 *   **Build Tool:** Maven
 *   **Containerization:** Docker
@@ -76,6 +78,9 @@ This is the backend repository. The frontend code is in a separate repository.
     # Frontend Configuration
     APP_FRONTEND_URL=http://localhost:5173
     APP_FRONTEND_GOOGLE_REDIRECT_URI=http://localhost:5173/oauth2/redirect
+
+    # Stripe Configuration
+    STRIPE_SECRET_KEY=<your_stripe_test_secret_key>
     ```
 
 ## Running the Application Locally
@@ -129,6 +134,7 @@ The project includes a [`Dockerfile`](Dockerfile) for easy containerization.
       -e MAIL_USERNAME="<your_email>" \
       -e MAIL_PASSWORD="<your_password>" \
       -e JWT_SECRET="<your_jwt_secret>" \
+      -e STRIPE_SECRET_KEY="<your_stripe_secret_key>" \
       -e APP_FRONTEND_URL="http://localhost:5173" \
       -e APP_FRONTEND_GOOGLE_REDIRECT_URI="http://localhost:5173/oauth2/redirect" \
       gauri-cooks-backend
@@ -146,6 +152,7 @@ The application exposes several REST endpoints. For detailed information, please
     - Administrative functions with enhanced security
 *   **Google Auth:** [`GoogleAuthController.java`](src/main/java/com/chef/V1/controller/GoogleAuthController.java)
     - OAuth2 authentication handling
+*   **Payment:** [`PaymentController.java`](src/main/java/com/chef/V1/controller/PaymentController.java)
 
 ## Security Features
 
